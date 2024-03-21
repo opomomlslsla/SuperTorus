@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperTorus.Server", "SuperTorus.Server\SuperTorus.Server.csproj", "{5E92BD91-A512-44D1-B78F-FA197A299AC2}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "supertorus.client", "supertorus.client\supertorus.client.esproj", "{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperTorus.Domain", "SuperTorus.Domain\SuperTorus.Domain.csproj", "{9A83C7F5-9CCC-4840-8E66-DFF08951362C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperTorus.Application", "SuperTorus.Application\SuperTorus.Application.csproj", "{76D97ADE-5313-4E6B-9528-11C26797B4DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperTorus.Infrastructure", "SuperTorus.Infrastructure\SuperTorus.Infrastructure.csproj", "{7AF89DAF-085E-4505-A349-4EABE4B1F423}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E92BD91-A512-44D1-B78F-FA197A299AC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E92BD91-A512-44D1-B78F-FA197A299AC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E92BD91-A512-44D1-B78F-FA197A299AC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E92BD91-A512-44D1-B78F-FA197A299AC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07CF7BA0-BFF6-4A4C-997D-BCFA9FDF4493}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{9A83C7F5-9CCC-4840-8E66-DFF08951362C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A83C7F5-9CCC-4840-8E66-DFF08951362C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A83C7F5-9CCC-4840-8E66-DFF08951362C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A83C7F5-9CCC-4840-8E66-DFF08951362C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D97ADE-5313-4E6B-9528-11C26797B4DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D97ADE-5313-4E6B-9528-11C26797B4DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D97ADE-5313-4E6B-9528-11C26797B4DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D97ADE-5313-4E6B-9528-11C26797B4DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AF89DAF-085E-4505-A349-4EABE4B1F423}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AF89DAF-085E-4505-A349-4EABE4B1F423}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AF89DAF-085E-4505-A349-4EABE4B1F423}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AF89DAF-085E-4505-A349-4EABE4B1F423}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {163D785B-E21A-430F-BB64-19629D3B2693}
+	EndGlobalSection
+EndGlobal
