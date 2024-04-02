@@ -12,7 +12,7 @@ namespace SuperTorus.Infrastructure.Data
     {
         public Context(DbContextOptions<Context> options) : base(options)
         {
-
+            //Database.EnsureCreated();
         }
 
         public DbSet<Torus> Torus { get; set; }

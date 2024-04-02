@@ -4,6 +4,9 @@ using SuperTorus.Domain.Interfaces;
 using SuperTorus.Infrastructure.Data;
 using SuperTorus.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using SuperTorus.Application.Validation;
+using SuperTorus.Application.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,7 @@ builder.Services.AddDbContext<Context>(options =>
 
 builder.Services.AddScoped<TorusService>();
 builder.Services.AddScoped<IRepository<Torus>, TorusRepository>();
+builder.Services.AddScoped<IValidator<RequestData>, RequestDataValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -14,6 +14,9 @@ namespace SuperTorus.Domain.Entities
         public double CenterX { get; set; }
         public double CenterY { get; set; }
         public double CenterZ { get; set; }
+
+        //Thetta/Psi/Ksi
+        public double Volume { get; set; }
         //public double AngleX { get; set; }
         //public double AngleZ { get; set; }
     }

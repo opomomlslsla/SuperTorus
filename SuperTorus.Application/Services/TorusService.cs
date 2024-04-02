@@ -1,34 +1,39 @@
-﻿using SuperTorus.Application.DTO;
+﻿using FluentValidation;
+using MethodTimer;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SuperTorus.Application.DTO;
+using SuperTorus.Application.Validation;
 using SuperTorus.Domain.Entities;
 using SuperTorus.Domain.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data;
 
 namespace SuperTorus.Application.Services
 {
-    public sealed class TorusService(IRepository<Torus> repository)
+    public sealed class TorusService(IRepository<Torus> repository, IValidator<RequestData> validator)
     {
         readonly IRepository<Torus> _repository = repository;
         readonly Random _random = new Random();
+        readonly IValidator<RequestData> _validator = validator;
 
-        public void AddTorus(RequestData data)
+
+        public async Task<double> CalculateTorus(RequestData data)
         {
-            for (int i = 0; i < data.Ncount; i++)
-            {
-                var torus = new Torus()
-                {
-                    CenterX = GetRandomValue(-data.A / 2, data.A / 2),
-                    CenterY = GetRandomValue(-data.A / 2, data.A / 2),
-                    CenterZ = GetRandomValue(-data.A / 2, data.A / 2),
-                    OuterRadius = GetRandomValue(data.MinRadius, data.MaxRadius),
-                    InnerRadius = GetRandomValue(0, data.MinRadius) // [0;1) поэтому хз это надо править или нет
-                };
+            _validator.ValidateAndThrow(data);
+            Torus[] toruses = CreateTorusesParralel(data);
+            double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
+            //double TorVolumeSum = toruses.Sum(x => x.Volume);
+            double AVolume = Math.Pow(data.A, 3);
+            var nc = TorVolumeSum / AVolume;
+            //toruses = toruses.OrderByDescending(x => x.Volume).ToArray();
+            return nc;
+        }
 
-                _repository.AddEntity(torus);
-            }
+        public async Task AddTorus(RequestData data)
+        {
+            _validator.ValidateAndThrow(data);
+            var toruses = CreateToruses(data, data.Ncount);
+            await _repository.AddManyEntities(toruses);
 
         }
 
@@ -57,6 +62,91 @@ namespace SuperTorus.Application.Services
         {
             return _random.NextDouble() * (maxValue - minValue) + minValue;
         }
+
+        [Time]
+        private Torus[] CreateTorusesParralel(RequestData data)
+        {
+            var torusArray = new Torus[data.Ncount];
+            Parallel.For(0, data.Ncount, new ParallelOptions { MaxDegreeOfParallelism =4} ,(int i) =>
+            {
+                var torus = CreateOneTorus(data);
+                torusArray[i] = torus;
+            });
+
+            return torusArray;
+        }
+
+        [Time]
+        private Torus[] CreateToruses(RequestData data, int ncount)
+        {
+            var torusArray = new Torus[ncount];
+            for (int i = 0; i < ncount; i++)
+            {
+                var torus = CreateOneTorus(data);
+                torusArray[i] = torus;
+            }
+            return torusArray;
+
+        }
+
+        [Time]
+        private async Task<Torus[]> CreateTorusesAsync(RequestData data)
+        {
+            Task<Torus>[] tasks = new Task<Torus>[data.Ncount];
+            for (int i = 0; i < data.Ncount; i++)
+            {
+                tasks[i] = Task.Run(() => CreateOneTorus(data));
+            }
+            var result = await Task.WhenAll(tasks);
+            return result;
+        }
+
+        [Time]
+        private async Task<Torus[]> CreateTorusesAsync2(RequestData data)
+        {
+            var tasks = new List<Task<Torus[]>>();
+            for ( int i =0; i<10; i++)
+            {
+                tasks.Add(Task.Run(() => CreateToruses(data, data.Ncount/10)));
+            }
+            var resarray = await Task.WhenAll(tasks);
+            var res = resarray.SelectMany(x => x).ToArray();
+            var res2 = res.Where(c => c != null).ToArray();
+            return res2;
+        }
+
+
+        private Torus CreateOneTorus(RequestData data)
+        {
+            var torus = new Torus()
+            {
+                CenterX = GetRandomValue(-data.A / 2, data.A / 2),
+                CenterY = GetRandomValue(-data.A / 2, data.A / 2),
+                CenterZ = GetRandomValue(-data.A / 2, data.A / 2),
+                OuterRadius = GetRandomValue(data.MinRadius, data.MaxRadius),
+                InnerRadius = GetRandomValue(data.MinRadius - data.Thickness, data.MinRadius)
+            };
+            torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.OuterRadius * Math.Pow((data.Thickness / 2), 2);
+            return torus;
+
+        }
+
+        public string ChekTorus(RequestData data)
+        {
+            _validator.ValidateAndThrow(data);
+            Torus[] toruses = CreateTorusesParralel(data);
+            double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
+            var nc = TorVolumeSum / Math.Pow(data.A,3);
+            if (nc > 0.4)
+            {
+                return $"data is not correct {nc}";
+            }
+            return "";
+        }
+
+
+
+
 
     }
 }

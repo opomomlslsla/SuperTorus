@@ -4,19 +4,47 @@ import './Styles/App.css'
 
 //const [myvar, setmyvar] = useState();
 function App() {
-    const [parameters, setParameters] = useState({
-        paramA: 1,
-        paramB: '',
-        paramC: ''
+    const [RequestData, setParameters] = useState({
+        A: 1,
+        MaxRadius: 1,
+        MinRadius: 1,
+        Thickness: 1,
+        Ncount: 1
     })
 
-    const [torus, SetTorus] = useState({
-        outerRadius: 3,
-        innerRadius: 1,
-        centerX: 1,
-        centerY: 1,
-        centerZ: 1
+    const [result, SetResult] = useState({
+        resultDouble: 0
     })
+
+    const [message, Setmessage] = useState({
+        error: ""
+    })
+
+    const FieldChangehandler = async () =>
+    {
+        //e.preventDefault();
+        for (let key in RequestData) {
+            //console.log(key);
+            console.log(RequestData[key]);
+            if (RequestData[key] == 0 || RequestData[key] == "") {
+                return
+            }
+        }
+        let response = await fetch('/Amin/Torus/TorusChek', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(RequestData)
+        });
+        let data = await response.json();
+        console.log(data);
+        Setmessage({
+            error: data
+        });
+
+    }
 
 
     const handleSubmit = async (e) => {
@@ -25,23 +53,19 @@ function App() {
         //fetch('https://jsonplaceholder.typicode.com/todos/1')
         //    .then(response => response.json())
         //    .then(json => console.log(json))
-        let response = await fetch('/Amin/Torus/GetString', {
+        let response = await fetch('/Amin/Torus/TorusCalc', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
-            }
+            },
+            body: JSON.stringify(RequestData)
         });
-        //let data = response.json();
-        console.log(response.json());
-        SetTorus(response);
-
-
-
-        setParameters({
-            paramA: '',
-            paramB: '',
-            paramC: ''
-        })
+        let data = await response.json();
+        console.log(data);
+        SetResult({
+            resultDouble: data
+        });
 
     }
 
@@ -49,7 +73,11 @@ function App() {
         <div>
 
             <h1>
-                {torus.outerRadius}
+                {message.error}
+                <br></br>
+            </h1>
+            <h1>
+                {result.resultDouble}
                 <br></br>
             </h1>
 
@@ -57,27 +85,50 @@ function App() {
                 <label>
                     Parametr A:
                     <input
-                        type="text"
-                        value={parameters.paramA}
-                        onChange={(e) => setParameters({ ...parameters, paramA: e.target.value })}
+                        required
+                        type="number"
+                        value={RequestData.A}
+                        onChange={(e) => { setParameters({ ...RequestData, A: e.target.value }); FieldChangehandler(); }}
                     />
                 </label>
                 <br />
                 <label>
-                    Parametr B:
+                    MaxRadius:
                     <input
-                        type="text"
-                        value={parameters.paramB}
-                        onChange={(e) => setParameters({ ...parameters, paramB: e.target.value })}
+                        required
+                        type="number"
+                        value={RequestData.MaxRadius}
+                        onChange={(e) => { setParameters({ ...RequestData, MaxRadius: e.target.value }); FieldChangehandler(); }}
                     />
                 </label>
                 <br />
                 <label>
-                    Parametr C:
+                    MinRadius:
                     <input
-                        type="text"
-                        value={parameters.paramC}
-                        onChange={(e) => setParameters({ ...parameters, paramC: e.target.value })}
+                        required
+                        type="number"
+                        value={RequestData.MinRadius}
+                        onChange={(e) => { setParameters({ ...RequestData, MinRadius: e.target.value }); FieldChangehandler(); }}
+                    />
+                </label>
+                <br />
+                <label>
+                    Thickness:
+                    <input
+                        required
+                        type="number"
+                        value={RequestData.Thickness}
+                        onChange={(e) => { setParameters({ ...RequestData, Thickness: e.target.value }); FieldChangehandler(); }}
+                    />
+                </label>
+                <br />
+                <label>
+                    Ncount:
+                    <input 
+                        required
+                        type="number"
+                        value={RequestData.Ncount}
+                        onChange={(e) => { setParameters({ ...RequestData, Ncount: e.target.value }); FieldChangehandler(); }}
                     />
                 </label>
                 <br />
