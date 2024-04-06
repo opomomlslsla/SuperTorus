@@ -17,7 +17,7 @@ namespace SuperTorus.Application.Services
         readonly IValidator<RequestData> _validator = validator;
 
 
-        public async Task<double> CalculateTorus(RequestData data)
+        public double CalculateTorus(RequestData data)
         {
             _validator.ValidateAndThrow(data);
             Torus[] toruses = CreateTorusesParralel(data);
@@ -118,17 +118,18 @@ namespace SuperTorus.Application.Services
 
         private Torus CreateOneTorus(RequestData data)
         {
+            var outradius = GetRandomValue(data.MinRadius, data.MaxRadius);
             var torus = new Torus()
             {
                 CenterX = GetRandomValue(-data.A / 2, data.A / 2),
                 CenterY = GetRandomValue(-data.A / 2, data.A / 2),
                 CenterZ = GetRandomValue(-data.A / 2, data.A / 2),
-                OuterRadius = GetRandomValue(data.MinRadius, data.MaxRadius),
-                InnerRadius = GetRandomValue(data.MinRadius - data.Thickness, data.MinRadius)
+                OuterRadius = outradius,
+                InnerRadius = GetRandomValue(outradius - data.Thickness, outradius)
             };
-            torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.OuterRadius * Math.Pow((data.Thickness / 2), 2);
+            var thikness = torus.OuterRadius - torus.InnerRadius;
+            torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.OuterRadius * Math.Pow((thikness / 2), 2);
             return torus;
-
         }
 
         public string ChekTorus(RequestData data)
@@ -139,14 +140,10 @@ namespace SuperTorus.Application.Services
             var nc = TorVolumeSum / Math.Pow(data.A,3);
             if (nc > 0.4)
             {
-                return $"data is not correct {nc}";
+                return $"data is not correct";
             }
-            return "";
+            return "Data is ok";
         }
-
-
-
-
 
     }
 }

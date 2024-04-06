@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using SuperTorus.Application.Validation;
 using SuperTorus.Application.DTO;
+using Serilog;
+using SuperTorus.Application.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,12 @@ builder.Services.AddScoped<TorusService>();
 builder.Services.AddScoped<IRepository<Torus>, TorusRepository>();
 builder.Services.AddScoped<IValidator<RequestData>, RequestDataValidator>();
 
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.File("Logs/Errorlogs.txt", rollingInterval: RollingInterval.Month)
+    .CreateLogger();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -38,6 +46,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<ExeptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 

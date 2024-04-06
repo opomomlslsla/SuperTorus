@@ -4,6 +4,7 @@ using SuperTorus.Application.Services;
 using SuperTorus.Application.DTO;
 using FluentValidation;
 using SuperTorus.Domain.Entities;
+using Serilog;
 
 
 
@@ -40,48 +41,15 @@ namespace SuperTorus.Server.Controllers
         public async Task<IActionResult> Calculate(RequestData requestData)
         {
             double res = 0;
-            try
-            {
-                res = await _service.CalculateTorus(requestData);
-            }
-            catch (ValidationException ex)
-            {
-
-            }
-            catch (Exception ex)
-            {
-                //Logger.logError(ex.ToString());
-                //return Ok(ex.Message);
-            }
+            res = _service.CalculateTorus(requestData);
             return Ok(res);
         }
 
         [HttpPost("TorusChek")]
-        public IActionResult TorusChek(RequestData requestData)
+        public async Task<IActionResult> TorusChek(RequestData requestData)
         {
-            
-            string res = "";
-            try
-            {
-                res = _service.ChekTorus(requestData);
-            }
-            catch(ValidationException ex)
-            {
-                return Ok("Bad Data");
-            }
-            catch (Exception ex)
-            {
-                //Logger.logError(ex.ToString());
-                //return Ok(ex.Message);
-            }
+            var res = _service.ChekTorus(requestData);
             return Ok(res);
-        }
-
-
-        [HttpGet("GetString")]
-        public string GetString()
-        {
-            return "sdsdsa";
         }
     }
 }

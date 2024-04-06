@@ -1,9 +1,6 @@
-import { useState } from 'react'
-import './Styles/App.css'
+import { useState } from "react";
+function MainForm() {
 
-
-//const [myvar, setmyvar] = useState();
-function App() {
     const [RequestData, setParameters] = useState({
         A: 1,
         MaxRadius: 1,
@@ -20,8 +17,8 @@ function App() {
         error: ""
     })
 
-    const FieldChangehandler = async () =>
-    {
+
+    const FieldChangehandler = async () => {
         //e.preventDefault();
         for (let key in RequestData) {
             //console.log(key);
@@ -46,13 +43,9 @@ function App() {
 
     }
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        //response = await fetch("https://catfact.ninja/fact");
-        //fetch('https://jsonplaceholder.typicode.com/todos/1')
-        //    .then(response => response.json())
-        //    .then(json => console.log(json))
+
         let response = await fetch('/Amin/Torus/TorusCalc', {
             method: 'POST',
             headers: {
@@ -61,39 +54,13 @@ function App() {
             },
             body: JSON.stringify(RequestData)
         });
+        let data = await response.json();
+        console.log(data);
+        SetResult({
+            resultDouble: data
+        });
 
-        if (response.status == 200) {
-            let data = await response.json();
-            console.log(data);
-
-
-            SetResult({
-                resultDouble: data
-            });
-        }
-
-        else {
-            let data = await response.json();
-            Setmessage({
-                error: data
-            }); }
-
-        
-
-    }
-
-    return (
-        <div>
-
-            <h1>
-                {message.error}
-                <br></br>
-            </h1>
-            <h1>
-                {result.resultDouble}
-                <br></br>
-            </h1>
-
+        return (
             <form onSubmit={handleSubmit}>
                 <label>
                     Parametr A:
@@ -101,7 +68,7 @@ function App() {
                         required
                         type="number"
                         value={RequestData.A}
-                        onChange={(e) => { setParameters({ ...RequestData, A: e.target.value });}}
+                        onChange={(e) => { setParameters({ ...RequestData, A: e.target.value }); }}
                     />
                 </label>
                 <br />
@@ -111,7 +78,7 @@ function App() {
                         required
                         type="number"
                         value={RequestData.MaxRadius}
-                        onChange={(e) => { setParameters({ ...RequestData, MaxRadius: e.target.value });}}
+                        onChange={(e) => { setParameters({ ...RequestData, MaxRadius: e.target.value }); }}
                     />
                 </label>
                 <br />
@@ -121,7 +88,7 @@ function App() {
                         required
                         type="number"
                         value={RequestData.MinRadius}
-                        onChange={(e) => { setParameters({ ...RequestData, MinRadius: e.target.value });}}
+                        onChange={(e) => { setParameters({ ...RequestData, MinRadius: e.target.value }); }}
                     />
                 </label>
                 <br />
@@ -131,13 +98,13 @@ function App() {
                         required
                         type="number"
                         value={RequestData.Thickness}
-                        onChange={(e) => { setParameters({ ...RequestData, Thickness: e.target.value });}}
+                        onChange={(e) => { setParameters({ ...RequestData, Thickness: e.target.value }); }}
                     />
                 </label>
                 <br />
                 <label>
                     Ncount:
-                    <input 
+                    <input
                         required
                         type="number"
                         value={RequestData.Ncount}
@@ -145,16 +112,10 @@ function App() {
                     />
                 </label>
                 <br />
+                <button onClick={this.FieldChangehandler}> Check </button>
                 <button type="submit">Submit</button>
             </form>
-            <button onClick={FieldChangehandler}> Check </button>
-        </div>
-    );
+        );
+    }
 }
-
-
-
-
-
-
-export default App
+export default MainForm;
