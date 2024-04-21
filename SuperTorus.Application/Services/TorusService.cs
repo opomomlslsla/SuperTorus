@@ -1,68 +1,40 @@
 ﻿using FluentValidation;
-using FluentValidation.Validators;
 using MethodTimer;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SuperTorus.Application.DTO;
-using SuperTorus.Application.Validation;
+using SuperTorus.Application.Extensions;
 using SuperTorus.Domain.Entities;
-using SuperTorus.Domain.Interfaces;
-using System;
-using System.Data;
+using System.Drawing;
+
 
 namespace SuperTorus.Application.Services
 {
-    public sealed class TorusService(IRepository<Torus> repository, IValidator<RequestData> validator)
+    public sealed class TorusService(IValidator<RequestData> validator)
     {
-        readonly IRepository<Torus> _repository = repository;
         readonly Random _random = new Random();
         readonly IValidator<RequestData> _validator = validator;
 
 
-        public double CalculateTorus(RequestData data)
+        public async Task<double> CalculateTorusAsync(RequestData data)
         {
             _validator.ValidateAndThrow(data);
-            Torus[] toruses = CreateTorussesMultiThread(data);
+            Torus[] toruses = await CreateTorusesAsync2(data);
             double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
-            //double TorVolumeSum = toruses.Sum(x => x.Volume);
             double AVolume = Math.Pow(data.A, 3);
             var nc = TorVolumeSum / AVolume;
-            //toruses = toruses.OrderByDescending(x => x.Volume).ToArray();
             return nc;
         }
 
-        public async Task AddTorus(RequestData data)
+
+        public double CalculateTorusParallel(RequestData data)
         {
             _validator.ValidateAndThrow(data);
-            var toruses = CreateToruses(data, data.Ncount);
-            await _repository.AddManyEntities(toruses);
-
+            Torus[] toruses = CreateTorusesParralel(data);
+            double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
+            double AVolume = Math.Pow(data.A, 3);
+            var nc = TorVolumeSum / AVolume;
+            return nc;
         }
 
-        public void RemoveTorus(Guid id)
-        {
-            var torus = _repository.GetEntityById(id);
-            _repository.RemoveEntity(torus);
-        }
-
-        public Torus GetTorus(Guid id)
-        {
-            return _repository.GetEntityById(id);
-        }
-
-        public ICollection<Torus> GetAllTorus()
-        {
-            return _repository.GetAllEntities();
-        }
-
-        public void AddmanyToruses(ICollection<Torus> torus)
-        {
-            _repository.AddManyEntities(torus);
-        }
-
-        private double GetRandomValue(double minValue, double maxValue)
-        {
-            return _random.NextDouble() * (maxValue - minValue) + minValue;
-        }
 
         [Time]
         private Torus[] CreateTorusesParralel(RequestData data)
@@ -96,15 +68,13 @@ namespace SuperTorus.Application.Services
         }
 
 
-        private Torus[] CreateToruses2(RequestData data, int starti, int endi, ref Torus[] torusArray)
+        private void CreateToruses2(RequestData data, int starti, int endi, Torus[] torusArray)
         {
             for (int i = starti; i < endi; i++)
             {
                 var torus = CreateOneTorus(data);
                 torusArray[i] = torus;
             }
-            return torusArray;
-
         }
 
 
@@ -112,20 +82,28 @@ namespace SuperTorus.Application.Services
         private Torus[] CreateTorussesMultiThread(RequestData data) 
         {
             Torus[] result = new Torus[data.Ncount];
-            List<Thread> threads = new List<Thread>();
-            for (int i = 1; i < 9; i++)
+            int chunkSize = data.Ncount / 10;
+            int threadCount = 10;
+            Thread[] threads = new Thread[threadCount];
+
+
+            for (int i = 0; i < threadCount ; i++)
             {
-                threads.Add(new Thread(() => CreateToruses2(data, data.Ncount / 10 * (i-1), data.Ncount/10 * i, ref result)));
+                int start = i * chunkSize;
+                int end = (i == threadCount - 1) ? data.Ncount : (i + 1) * chunkSize;
+                threads[i] =new Thread(() => 
+                { 
+                    for(int j = start; j<end; j++)
+                    {
+                        result[j] = CreateOneTorus(data);
+                    }
+                });
+                threads[i].Start();
             }
-
-            threads.Add(new Thread(() => CreateToruses2(data, data.Ncount / 10 * 9, data.Ncount, ref result)));
-
             foreach( Thread thread in threads)
             {
-                thread.Start();
                 thread.Join();
             }
-
             return result;
         }
 
@@ -147,29 +125,34 @@ namespace SuperTorus.Application.Services
         private async Task<Torus[]> CreateTorusesAsync2(RequestData data)
         {
             Torus[] result = new Torus[data.Ncount];
-            var tasks = new List<Task<Torus[]>>();
-            for ( int i = 1; i < 9; i++)
-            {
-                tasks.Add(Task.Run(() => CreateToruses2(data, data.Ncount/10 * (i-1),data.Ncount/10 * i, ref result)));
-            }
+            int chunkSize = data.Ncount / 10;
+            int threadCount = 10;
+            Task[] tasks = new Task[threadCount];
 
-            tasks.Add(Task.Run(() => CreateToruses2(data, data.Ncount / 10 * 9, data.Ncount, ref result)));
+            for ( int i = 0; i < 10; i++)
+            {
+                int start = i * chunkSize;
+                int end = (i == threadCount - 1) ? data.Ncount : (i + 1) * chunkSize;
+                tasks[i] = Task.Run(() => CreateToruses2(data, start, end, result));
+            }
 
             await Task.WhenAll(tasks);
             return result;
         }
 
 
+
+
         private Torus CreateOneTorus(RequestData data)
         {
-            var outradius = GetRandomValue(data.MinRadius, data.MaxRadius);
+            var outradius = _random.GetRandomValue(data.MinRadius, data.MaxRadius);
             var torus = new Torus()
             {
-                CenterX = GetRandomValue(-data.A / 2, data.A / 2),
-                CenterY = GetRandomValue(-data.A / 2, data.A / 2),
-                CenterZ = GetRandomValue(-data.A / 2, data.A / 2),
+                CenterX = _random.GetRandomValue(-data.A / 2, data.A / 2),
+                CenterY = _random.GetRandomValue(-data.A / 2, data.A / 2),
+                CenterZ = _random.GetRandomValue(-data.A / 2, data.A / 2),
                 OuterRadius = outradius,
-                InnerRadius = GetRandomValue(outradius - data.Thickness, outradius)
+                InnerRadius = _random.GetRandomValue(outradius - data.Thickness, outradius)
             };
             var thikness = torus.OuterRadius - torus.InnerRadius;
             torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.OuterRadius * Math.Pow((thikness / 2), 2);

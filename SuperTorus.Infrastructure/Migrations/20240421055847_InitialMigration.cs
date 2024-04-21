@@ -18,14 +18,18 @@ namespace SuperTorus.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OuterRadius = table.Column<double>(type: "float", nullable: false),
                     InnerRadius = table.Column<double>(type: "float", nullable: false),
-                    CenterX = table.Column<double>(type: "float", nullable: false),
-                    CenterY = table.Column<double>(type: "float", nullable: false),
-                    CenterZ = table.Column<double>(type: "float", nullable: false)
+                    Volume = table.Column<double>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Torus", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Torus_Volume",
+                table: "Torus",
+                column: "Volume",
+                descending: new bool[0]);
         }
 
         /// <inheritdoc />

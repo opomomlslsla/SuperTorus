@@ -27,7 +27,8 @@ builder.Services.AddDbContext<Context>(options =>
 });
 
 builder.Services.AddScoped<TorusService>();
-builder.Services.AddScoped<IRepository<Torus>, TorusRepository>();
+builder.Services.AddScoped<TorusDBService>();
+builder.Services.AddScoped<IRepository<TorusDB>, TorusRepository>();
 builder.Services.AddScoped<IValidator<RequestData>, RequestDataValidator>();
 
 

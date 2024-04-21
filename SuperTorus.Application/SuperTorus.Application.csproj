@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SuperTorus.Domain\SuperTorus.Domain.csproj" />
+    <ProjectReference Include="..\SuperTorus.Infrastructure\SuperTorus.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

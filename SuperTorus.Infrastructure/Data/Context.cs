@@ -12,9 +12,14 @@ namespace SuperTorus.Infrastructure.Data
     {
         public Context(DbContextOptions<Context> options) : base(options)
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
-        public DbSet<Torus> Torus { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TorusDB>().HasIndex(x => x.Volume).IsDescending();
+        }
+
+        public DbSet<TorusDB> Torus { get; set; }
     }
 }

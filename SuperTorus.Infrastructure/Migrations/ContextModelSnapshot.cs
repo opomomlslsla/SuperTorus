@@ -22,20 +22,11 @@ namespace SuperTorus.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SuperTorus.Domain.Entities.Torus", b =>
+            modelBuilder.Entity("SuperTorus.Domain.Entities.TorusDB", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("CenterX")
-                        .HasColumnType("float");
-
-                    b.Property<double>("CenterY")
-                        .HasColumnType("float");
-
-                    b.Property<double>("CenterZ")
-                        .HasColumnType("float");
 
                     b.Property<double>("InnerRadius")
                         .HasColumnType("float");
@@ -43,7 +34,13 @@ namespace SuperTorus.Infrastructure.Migrations
                     b.Property<double>("OuterRadius")
                         .HasColumnType("float");
 
+                    b.Property<double>("Volume")
+                        .HasColumnType("float");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Volume")
+                        .IsDescending();
 
                     b.ToTable("Torus");
                 });

@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Serilog;
 using System.Data.Common;
 using System.Net;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace SuperTorus.Application.Middleware
 {
