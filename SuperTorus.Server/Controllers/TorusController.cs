@@ -38,7 +38,7 @@ namespace SuperTorus.Server.Controllers
 
 
         [HttpPost("TorusCalc")]
-        public async Task<IActionResult> Calculate(RequestData requestData)
+        public IActionResult Calculate(RequestData requestData)
         {
             double res = 0;
             res = _service.CalculateTorus(requestData);
@@ -48,7 +48,7 @@ namespace SuperTorus.Server.Controllers
         [HttpPost("TorusChek")]
         public async Task<IActionResult> TorusChek(RequestData requestData)
         {
-            var res = _service.ChekTorus(requestData);
+            var res = await _service.ChekTorus(requestData);
             return Ok(res);
         }
     }

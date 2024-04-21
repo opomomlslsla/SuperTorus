@@ -13,7 +13,7 @@ namespace SuperTorus.Application.Validation
         public RequestDataValidator() 
         {
             RuleFor(x => x.A).GreaterThan(0);
-            RuleFor(x => x.Thickness).GreaterThan(0);
+            RuleFor(x => x.Thickness).GreaterThan(0).LessThan(x => x.MinRadius);
             RuleFor(x => x.MinRadius).GreaterThan(0);
             RuleFor(x => x.MaxRadius).GreaterThan(0);
             RuleFor(x => x.MinRadius).LessThan(x => x.MaxRadius);

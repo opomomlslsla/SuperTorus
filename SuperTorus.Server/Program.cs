@@ -19,7 +19,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<Context>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"), 
+        builder => 
+        {
+            builder.EnableRetryOnFailure();
+        });
 });
 
 builder.Services.AddScoped<TorusService>();

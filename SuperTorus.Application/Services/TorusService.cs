@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Validators;
 using MethodTimer;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SuperTorus.Application.DTO;
@@ -20,7 +21,7 @@ namespace SuperTorus.Application.Services
         public double CalculateTorus(RequestData data)
         {
             _validator.ValidateAndThrow(data);
-            Torus[] toruses = CreateTorusesParralel(data);
+            Torus[] toruses = CreateTorussesMultiThread(data);
             double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
             //double TorVolumeSum = toruses.Sum(x => x.Volume);
             double AVolume = Math.Pow(data.A, 3);
@@ -76,6 +77,11 @@ namespace SuperTorus.Application.Services
             return torusArray;
         }
 
+        //private Torus[] CreateTorusesMultithread(RequestData data)
+        //{
+        //    var torusarray;
+        //}
+
         [Time]
         private Torus[] CreateToruses(RequestData data, int ncount)
         {
@@ -88,6 +94,42 @@ namespace SuperTorus.Application.Services
             return torusArray;
 
         }
+
+
+        private Torus[] CreateToruses2(RequestData data, int starti, int endi, ref Torus[] torusArray)
+        {
+            for (int i = starti; i < endi; i++)
+            {
+                var torus = CreateOneTorus(data);
+                torusArray[i] = torus;
+            }
+            return torusArray;
+
+        }
+
+
+        [Time]
+        private Torus[] CreateTorussesMultiThread(RequestData data) 
+        {
+            Torus[] result = new Torus[data.Ncount];
+            List<Thread> threads = new List<Thread>();
+            for (int i = 1; i < 9; i++)
+            {
+                threads.Add(new Thread(() => CreateToruses2(data, data.Ncount / 10 * (i-1), data.Ncount/10 * i, ref result)));
+            }
+
+            threads.Add(new Thread(() => CreateToruses2(data, data.Ncount / 10 * 9, data.Ncount, ref result)));
+
+            foreach( Thread thread in threads)
+            {
+                thread.Start();
+                thread.Join();
+            }
+
+            return result;
+        }
+
+
 
         [Time]
         private async Task<Torus[]> CreateTorusesAsync(RequestData data)
@@ -104,15 +146,17 @@ namespace SuperTorus.Application.Services
         [Time]
         private async Task<Torus[]> CreateTorusesAsync2(RequestData data)
         {
+            Torus[] result = new Torus[data.Ncount];
             var tasks = new List<Task<Torus[]>>();
-            for ( int i =0; i<10; i++)
+            for ( int i = 1; i < 9; i++)
             {
-                tasks.Add(Task.Run(() => CreateToruses(data, data.Ncount/10)));
+                tasks.Add(Task.Run(() => CreateToruses2(data, data.Ncount/10 * (i-1),data.Ncount/10 * i, ref result)));
             }
-            var resarray = await Task.WhenAll(tasks);
-            var res = resarray.SelectMany(x => x).ToArray();
-            var res2 = res.Where(c => c != null).ToArray();
-            return res2;
+
+            tasks.Add(Task.Run(() => CreateToruses2(data, data.Ncount / 10 * 9, data.Ncount, ref result)));
+
+            await Task.WhenAll(tasks);
+            return result;
         }
 
 
@@ -132,10 +176,10 @@ namespace SuperTorus.Application.Services
             return torus;
         }
 
-        public string ChekTorus(RequestData data)
+        public async Task<string> ChekTorus(RequestData data)
         {
             _validator.ValidateAndThrow(data);
-            Torus[] toruses = CreateTorusesParralel(data);
+            Torus[] toruses = await Task.Run(() => CreateTorusesParralel(data));
             double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
             var nc = TorVolumeSum / Math.Pow(data.A,3);
             if (nc > 0.4)

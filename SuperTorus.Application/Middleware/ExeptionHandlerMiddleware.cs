@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Serilog;
+using System.Data.Common;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -27,7 +28,14 @@ namespace SuperTorus.Application.Middleware
                 await HandleExeptionAsync(httpContext, msg, HttpStatusCode.BadRequest);
 
             }
+            catch(DbException ex)
+            {
+                Log.Information($"{ex.Message} \n {ex.InnerException} \n {ex.StackTrace} \n");
 
+                string msg = $"{ex.Message} \n {ex.InnerException} \n {ex.StackTrace} \n";
+
+                await HandleExeptionAsync(httpContext, msg, HttpStatusCode.BadRequest);
+            }
             catch (Exception ex)
             {
                 Log.Information($"{ex.Message} \n {ex.InnerException} \n {ex.StackTrace} \n");
