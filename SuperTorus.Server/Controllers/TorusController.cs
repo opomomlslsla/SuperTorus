@@ -37,8 +37,8 @@ namespace SuperTorus.Server.Controllers
         [HttpPost("TorusCalcAsync")]
         public async Task<IActionResult> CalculateAsync(RequestData requestData)
         {
-            double res = 0;
-            res = await _service.CalculateTorusAsync(requestData);
+            
+            var res = await _service.CalculateTorusAsync(requestData);
             return Ok(res);
         }
 

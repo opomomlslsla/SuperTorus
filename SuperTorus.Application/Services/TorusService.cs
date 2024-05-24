@@ -3,6 +3,7 @@ using MethodTimer;
 using SuperTorus.Application.DTO;
 using SuperTorus.Application.Extensions;
 using SuperTorus.Domain.Entities;
+using SuperTorus.Domain.Tools;
 using System.Drawing;
 
 
@@ -14,14 +15,39 @@ namespace SuperTorus.Application.Services
         readonly IValidator<RequestData> _validator = validator;
 
 
-        public async Task<double> CalculateTorusAsync(RequestData data)
+        public async Task<ResponseData> CalculateTorusAsync(RequestData data)
         {
             _validator.ValidateAndThrow(data);
             Torus[] toruses = await CreateTorusesAsync2(data);
+            List<List<Sphere>> resultToruses = new List<List<Sphere>>();
+            resultToruses.Add(toruses[0].TurnIntoSpheres());
+            List<Sphere> res = new List<Sphere>();
+            res.AddRange(resultToruses[0]);
+            for (int i =0; i< toruses.Length; i++)
+            {
+                var spheres1 = toruses[i].TurnIntoSpheres();
+
+                bool flag = false;
+                for (int j = 0; j < resultToruses.Count; j++)
+                {
+                    if (IsTorusesColliding(spheres1, resultToruses[j]))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag)
+                {
+                    resultToruses.Add(spheres1);
+                    res.AddRange(spheres1);
+                }
+                flag = false;
+            }
+            
             double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
             double AVolume = Math.Pow(data.A, 3);
             var nc = TorVolumeSum / AVolume;
-            return nc;
+            return new ResponseData { Nc = nc, Toruses = res.ToArray()};
         }
 
 
@@ -49,11 +75,6 @@ namespace SuperTorus.Application.Services
             return torusArray;
         }
 
-        //private Torus[] CreateTorusesMultithread(RequestData data)
-        //{
-        //    var torusarray;
-        //}
-
         [Time]
         private Torus[] CreateToruses(RequestData data, int ncount)
         {
@@ -66,7 +87,6 @@ namespace SuperTorus.Application.Services
             return torusArray;
 
         }
-
 
         private void CreateToruses2(RequestData data, int starti, int endi, Torus[] torusArray)
         {
@@ -140,22 +160,19 @@ namespace SuperTorus.Application.Services
             return result;
         }
 
-
-
-
         private Torus CreateOneTorus(RequestData data)
         {
-            var outradius = _random.GetRandomValue(data.MinRadius, data.MaxRadius);
             var torus = new Torus()
             {
                 CenterX = _random.GetRandomValue(-data.A / 2, data.A / 2),
                 CenterY = _random.GetRandomValue(-data.A / 2, data.A / 2),
                 CenterZ = _random.GetRandomValue(-data.A / 2, data.A / 2),
-                OuterRadius = outradius,
-                InnerRadius = _random.GetRandomValue(outradius - data.Thickness, outradius)
+                Radius = _random.GetRandomValue(data.MinRadius, data.MaxRadius),
+                Tube = _random.GetRandomValue(0, data.Thickness),
+                AngleX = _random.GetRandomValue(0,Math.PI / 2),
+                AngleY = _random.GetRandomValue(0, Math.PI / 2)
             };
-            var thikness = torus.OuterRadius - torus.InnerRadius;
-            torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.OuterRadius * Math.Pow((thikness / 2), 2);
+            torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.Radius * Math.Pow(torus.Tube, 2);
             return torus;
         }
 
@@ -170,6 +187,24 @@ namespace SuperTorus.Application.Services
                 return $"data is not correct";
             }
             return "Data is ok";
+        }
+        private static bool IsTorusesColliding(List<Sphere> spheres1, List<Sphere> spheres2)
+        {
+            for (int i = 0; i < spheres1.Count; i++)
+            {
+                for (int j = 0; j < spheres2.Count; j++)
+                {
+                    double x1 = spheres1[i].CenterX, y1 = spheres1[i].CenterY, z1 = spheres1[i].CenterZ, r1 = spheres1[i].Radius;
+                    double x2 = spheres2[j].CenterX, y2 = spheres2[j].CenterY, z2 = spheres2[j].CenterZ, r2 = spheres2[j].Radius;
+
+                    double distance = Math.Sqrt(Math.Pow(Math.Abs(x2 - x1), 2) + Math.Pow(Math.Abs(y2 - y1), 2) + Math.Pow(Math.Abs(z2 - z1), 2));
+                    if (distance <= r1 + r2)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
     }

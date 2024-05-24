@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SuperTorus.Domain.Entities;
+using SuperTorus.Domain.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace SuperTorus.Application.DTO
 {
-    public class ResponseData<T> where T : class
+    public class ResponseData
     {
-        T Data { get; set; }
-        string Errormessage { get; set; }
-
+        public double Nc { get; set; }
+        public Sphere[] Toruses { get; set; } = new Sphere[0];
+        public string Message { get; set; } = string.Empty;
     }
 }

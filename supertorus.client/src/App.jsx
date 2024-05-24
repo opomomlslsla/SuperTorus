@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './Styles/App.css'
+import { Canvas } from '@react-three/fiber'
+import TorusView from './Components/TorusView'
 
 
 //const [myvar, setmyvar] = useState();
@@ -19,6 +21,12 @@ function App() {
     const [message, Setmessage] = useState({
         error: ""
     })
+
+    const [torusList, setList] = useState([
+        { radius: 7, centerX: 0, centerY: 0, centerZ: 0 },
+        { radius: 5, centerX: 0, centerY: 0, centerZ: 0},
+        { radius: 3, centerX: 0, centerY: 0, centerZ: 0,}
+    ]);
 
     const FieldChangehandler = async () =>
     {
@@ -41,7 +49,7 @@ function App() {
         let data = await response.json();
         console.log(data);
         Setmessage({
-            error: data
+            error: data.message
         });
 
     }
@@ -53,7 +61,7 @@ function App() {
         //fetch('https://jsonplaceholder.typicode.com/todos/1')
         //    .then(response => response.json())
         //    .then(json => console.log(json))
-        let response = await fetch('/Amin/Torus/TorusCalc', {
+        let response = await fetch('/Amin/Torus/TorusCalcAsync', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -68,93 +76,94 @@ function App() {
 
 
             SetResult({
-                resultDouble: data
+                resultDouble: data.nc
             });
+
+            setList(data.toruses)
         }
 
         else {
             let data = await response.json();
             Setmessage({
                 error: data
-            }); }
-
-        
-
+            });
+        }
     }
-
+    //Некоторые торы пересекаются, это надо исправить 
+    //TODO вывести в отдельный компонент форму каким-то образом, сделать эксепшен хендлинг с всплывающей подсказкой
+    //также решить прикол с пересечением торов и сделать красивое оторбражение, не как щас
     return (
-        <div>
+            <div style={{ display: 'inline-flex' }} >
 
-            <h1>
-                {message.error}
-                <br></br>
-            </h1>
-            <h1>
-                {result.resultDouble}
-                <br></br>
-            </h1>
+            <TorusView torusList={torusList} axes={ RequestData.A } />
+            <div>
+                <h1>
+                    {message.error}
+                    <br></br>
+                </h1>
+                <h1>
+                    {result.resultDouble}
+                    <br></br>
+                </h1>
 
-            <form onSubmit={handleSubmit}>
-                <label>
-                    Parametr A:
-                    <input
-                        required
-                        type="number"
-                        value={RequestData.A}
-                        onChange={(e) => { setParameters({ ...RequestData, A: e.target.value });}}
-                    />
-                </label>
-                <br />
-                <label>
-                    MaxRadius:
-                    <input
-                        required
-                        type="number"
-                        value={RequestData.MaxRadius}
-                        onChange={(e) => { setParameters({ ...RequestData, MaxRadius: e.target.value });}}
-                    />
-                </label>
-                <br />
-                <label>
-                    MinRadius:
-                    <input
-                        required
-                        type="number"
-                        value={RequestData.MinRadius}
-                        onChange={(e) => { setParameters({ ...RequestData, MinRadius: e.target.value });}}
-                    />
-                </label>
-                <br />
-                <label>
-                    Thickness:
-                    <input
-                        required
-                        type="number"
-                        value={RequestData.Thickness}
-                        onChange={(e) => { setParameters({ ...RequestData, Thickness: e.target.value });}}
-                    />
-                </label>
-                <br />
-                <label>
-                    Ncount:
-                    <input 
-                        required
-                        type="number"
-                        value={RequestData.Ncount}
-                        onChange={(e) => { setParameters({ ...RequestData, Ncount: e.target.value }); }}
-                    />
-                </label>
-                <br />
-                <button type="submit">Submit</button>
-            </form>
-            <button onClick={FieldChangehandler}> Check </button>
+                <form onSubmit={handleSubmit}>
+                    <label>
+                        Parametr A:
+                        <input
+                            required
+                            type="number"
+                            value={RequestData.A}
+                            onChange={(e) => { setParameters({ ...RequestData, A: e.target.value }); }}
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        MaxRadius:
+                        <input
+                            required
+                            type="number"
+                            value={RequestData.MaxRadius}
+                            onChange={(e) => { setParameters({ ...RequestData, MaxRadius: e.target.value }); }}
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        MinRadius:
+                        <input
+                            required
+                            type="number"
+                            value={RequestData.MinRadius}
+                            onChange={(e) => { setParameters({ ...RequestData, MinRadius: e.target.value }); }}
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Thickness:
+                        <input
+                            required
+                            type="number"
+                            value={RequestData.Thickness}
+                            onChange={(e) => { setParameters({ ...RequestData, Thickness: e.target.value }); }}
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Ncount:
+                        <input
+                            required
+                            type="number"
+                            value={RequestData.Ncount}
+                            onChange={(e) => { setParameters({ ...RequestData, Ncount: e.target.value }); }}
+                        />
+                    </label>
+                    <br />
+                    <button type="submit">Submit</button>
+                </form>
+
+                <button onClick={FieldChangehandler}> Check </button>
+            </div>
         </div>
     );
 }
-
-
-
-
-
 
 export default App

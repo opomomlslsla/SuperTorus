@@ -17,7 +17,7 @@ namespace SuperTorus.Application.Validation
             RuleFor(x => x.MinRadius).GreaterThan(0);
             RuleFor(x => x.MaxRadius).GreaterThan(0);
             RuleFor(x => x.MinRadius).LessThan(x => x.MaxRadius);
-            RuleFor(x => x.MaxRadius).LessThan(x => x.A);
+            RuleFor(x => x.MaxRadius).LessThan(x => x.A + x.Thickness);
             RuleFor(x => x.MinRadius).LessThan(x => x.A);
 
 
