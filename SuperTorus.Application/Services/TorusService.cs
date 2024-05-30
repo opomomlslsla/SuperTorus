@@ -5,6 +5,7 @@ using SuperTorus.Application.Extensions;
 using SuperTorus.Domain.Entities;
 using SuperTorus.Domain.Tools;
 using System.Drawing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace SuperTorus.Application.Services
@@ -25,23 +26,16 @@ namespace SuperTorus.Application.Services
             res.AddRange(resultToruses[0]);
             for (int i =0; i< toruses.Length; i++)
             {
-                var spheres1 = toruses[i].TurnIntoSpheres();
 
-                bool flag = false;
-                for (int j = 0; j < resultToruses.Count; j++)
+                for (int counter=0; counter<100; counter++)
                 {
-                    if (IsTorusesColliding(spheres1, resultToruses[j]))
+                    var spheres1 = toruses[i].TurnIntoSpheres();
+                    if(!CheckIntersections(spheres1, resultToruses, res))
                     {
-                        flag = true;
                         break;
                     }
                 }
-                if (!flag)
-                {
-                    resultToruses.Add(spheres1);
-                    res.AddRange(spheres1);
-                }
-                flag = false;
+                
             }
             
             double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
@@ -127,20 +121,6 @@ namespace SuperTorus.Application.Services
             return result;
         }
 
-
-
-        [Time]
-        private async Task<Torus[]> CreateTorusesAsync(RequestData data)
-        {
-            Task<Torus>[] tasks = new Task<Torus>[data.Ncount];
-            for (int i = 0; i < data.Ncount; i++)
-            {
-                tasks[i] = Task.Run(() => CreateOneTorus(data));
-            }
-            var result = await Task.WhenAll(tasks);
-            return result;
-        }
-
         [Time]
         private async Task<Torus[]> CreateTorusesAsync2(RequestData data)
         {
@@ -205,6 +185,27 @@ namespace SuperTorus.Application.Services
                 }
             }
             return false;
+        }
+
+        //Summary returns false if torus does not intersect
+        private bool CheckIntersections(List<Sphere> spheres,List<List<Sphere>> listsOfSpheres, List<Sphere> res)
+        {
+            bool flag =false;
+
+            for (int j = 0; j < listsOfSpheres.Count; j++)
+            {
+                if (IsTorusesColliding(spheres, listsOfSpheres[j]))
+                {
+                    flag = true;
+                    return flag;
+                }
+            }
+            if (!flag)
+            {
+                listsOfSpheres.Add(spheres);
+                res.AddRange(spheres);
+            }
+            return flag;
         }
 
     }
