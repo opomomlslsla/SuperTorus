@@ -4,8 +4,7 @@ using SuperTorus.Application.DTO;
 using SuperTorus.Application.Extensions;
 using SuperTorus.Domain.Entities;
 using SuperTorus.Domain.Tools;
-using System.Drawing;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Security.Cryptography;
 
 
 namespace SuperTorus.Application.Services
@@ -23,25 +22,38 @@ namespace SuperTorus.Application.Services
             List<List<Sphere>> resultToruses = new List<List<Sphere>>();
             resultToruses.Add(toruses[0].TurnIntoSpheres());
             List<Sphere> res = new List<Sphere>();
-            res.AddRange(resultToruses[0]);
+            List<Torus> res2 = new List<Torus>();
             for (int i =0; i< toruses.Length; i++)
             {
-
+                bool flag =false;
                 for (int counter=0; counter<100; counter++)
                 {
                     var spheres1 = toruses[i].TurnIntoSpheres();
-                    if(!CheckIntersections(spheres1, resultToruses, res))
+                    if(!CheckIntersections(spheres1, resultToruses, res, data.A))
                     {
+                        flag = true;
                         break;
                     }
+                    else
+                    {
+                        toruses[i].CenterX = _random.GetRandomValue(-data.A / 2, data.A / 2);
+                        toruses[i].CenterY = _random.GetRandomValue(-data.A / 2, data.A / 2);
+                        toruses[i].CenterZ = _random.GetRandomValue(-data.A / 2, data.A / 2);
+                        toruses[i].AngleX = _random.GetRandomValue(0, Math.PI / 2);
+                        toruses[i].AngleY = _random.GetRandomValue(0, Math.PI / 2);
+                    }
+                }
+                if (flag)
+                {
+                    res2.Add(toruses[i]);
                 }
                 
             }
             
-            double TorVolumeSum = toruses.AsParallel().Sum(x => x.Volume);
+            double TorVolumeSum = res2.AsParallel().Sum(x => x.Volume);
             double AVolume = Math.Pow(data.A, 3);
             var nc = TorVolumeSum / AVolume;
-            return new ResponseData { Nc = nc, Toruses = res.ToArray()};
+            return new ResponseData { Nc = nc, Toruses = res.ToArray(), Count = res2.Count};
         }
 
 
@@ -149,7 +161,7 @@ namespace SuperTorus.Application.Services
                 CenterZ = _random.GetRandomValue(-data.A / 2, data.A / 2),
                 Radius = _random.GetRandomValue(data.MinRadius, data.MaxRadius),
                 Tube = _random.GetRandomValue(0, data.Thickness),
-                AngleX = _random.GetRandomValue(0,Math.PI / 2),
+                AngleX = _random.GetRandomValue(0, Math.PI / 2),
                 AngleY = _random.GetRandomValue(0, Math.PI / 2)
             };
             torus.Volume = Math.Pow(Math.PI, 2) * 2 * torus.Radius * Math.Pow(torus.Tube, 2);
@@ -168,7 +180,8 @@ namespace SuperTorus.Application.Services
             }
             return "Data is ok";
         }
-        private static bool IsTorusesColliding(List<Sphere> spheres1, List<Sphere> spheres2)
+        //true if any of spheres intersects
+        private bool IsTorusesColliding(List<Sphere> spheres1, List<Sphere> spheres2, double a)
         {
             for (int i = 0; i < spheres1.Count; i++)
             {
@@ -178,7 +191,8 @@ namespace SuperTorus.Application.Services
                     double x2 = spheres2[j].CenterX, y2 = spheres2[j].CenterY, z2 = spheres2[j].CenterZ, r2 = spheres2[j].Radius;
 
                     double distance = Math.Sqrt(Math.Pow(Math.Abs(x2 - x1), 2) + Math.Pow(Math.Abs(y2 - y1), 2) + Math.Pow(Math.Abs(z2 - z1), 2));
-                    if (distance <= r1 + r2)
+                    
+                    if ((distance <= r1 + r2) || IsOutsideTheBox(x1,y1,z1,r1,a))
                     {
                         return true;
                     }
@@ -188,13 +202,13 @@ namespace SuperTorus.Application.Services
         }
 
         //Summary returns false if torus does not intersect
-        private bool CheckIntersections(List<Sphere> spheres,List<List<Sphere>> listsOfSpheres, List<Sphere> res)
+        private bool CheckIntersections(List<Sphere> spheres,List<List<Sphere>> listsOfSpheres, List<Sphere> res, double a)
         {
             bool flag =false;
 
             for (int j = 0; j < listsOfSpheres.Count; j++)
             {
-                if (IsTorusesColliding(spheres, listsOfSpheres[j]))
+                if (IsTorusesColliding(spheres, listsOfSpheres[j], a))
                 {
                     flag = true;
                     return flag;
@@ -206,6 +220,16 @@ namespace SuperTorus.Application.Services
                 res.AddRange(spheres);
             }
             return flag;
+        }
+        
+
+        private bool IsOutsideTheBox(double x1, double y1, double z1, double r1, double a)
+        {
+            if ((Math.Abs(x1) + r1) >= a / 2 || (Math.Abs(y1) + r1) >= a / 2 || (Math.Abs(z1) + r1) >= a / 2)
+            {
+                return true;
+            }
+            return false;
         }
 
     }

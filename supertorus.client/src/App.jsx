@@ -15,7 +15,8 @@ function App() {
     })
 
     const [result, SetResult] = useState({
-        resultDouble: 0
+        resultDouble: 0,
+        count: 0
     })
 
     const [message, Setmessage] = useState({
@@ -61,7 +62,7 @@ function App() {
         //fetch('https://jsonplaceholder.typicode.com/todos/1')
         //    .then(response => response.json())
         //    .then(json => console.log(json))
-        let response = await fetch('/Amin/Torus/TorusCalcAsync', {
+        let response = await fetch('https://localhost:7183/Amin/Torus/TorusCalcAsync', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -76,7 +77,8 @@ function App() {
 
 
             SetResult({
-                resultDouble: data.nc
+                resultDouble: data.nc,
+                count : data.count
             });
 
             setList(data.toruses)
@@ -93,14 +95,16 @@ function App() {
     return (
             <div style={{ display: 'inline-flex' }} >
 
-            <TorusView torusList={torusList} axes={ RequestData.A } />
+            <TorusView torusList={torusList} axes={ RequestData.A.valueOf() } />
             <div>
                 <h1>
                     {message.error}
                     <br></br>
                 </h1>
                 <h1>
-                    {result.resultDouble}
+                    NC: {result.resultDouble}
+                    <br></br>
+                    Count: {result.count}
                     <br></br>
                 </h1>
 

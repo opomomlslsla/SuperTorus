@@ -7,6 +7,10 @@ const TorusView = ({ torusList, axes }) => {
             <Canvas >
                 <OrbitControls />
                 <axesHelper args={[axes]} />
+                <mesh>
+                    <boxGeometry args={[axes, axes, axes,15,15,15]} />
+                    <meshNormalMaterial wireframe />
+                </mesh>
                 {torusList.map((tor, index) =>
                     <mesh key={index} position={[tor.centerX, tor.centerY, tor.centerZ]} >
 

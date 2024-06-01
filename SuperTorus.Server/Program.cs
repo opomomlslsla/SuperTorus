@@ -14,6 +14,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("any", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowAnyOrigin();
+    });
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
@@ -37,13 +47,16 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File("Logs/Errorlogs.txt", rollingInterval: RollingInterval.Month)
     .CreateLogger();
 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
+app.UseCors("any");
+
 app.UseDefaultFiles();
-app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -55,10 +68,12 @@ app.UseMiddleware<ExeptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-//app.MapFallbackToFile("/index.html");
+app.MapFallbackToFile("/index.html");
 
 app.Run();
